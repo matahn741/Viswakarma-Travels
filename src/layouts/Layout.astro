@@ -1,0 +1,151 @@
+---
+import { siteMeta, navLinks, publicBrandLogoPath } from "../config/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = siteMeta.name,
+  description = siteMeta.description,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#042f2e" />
+    <title>{title}</title>
+    <style is:global>
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes gentle-float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-4px);
+        }
+      }
+      .animate-fade-up {
+        animation: fade-up 0.55s ease-out both;
+      }
+      .animate-gentle-float {
+        animation: gentle-float 5s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animate-fade-up,
+        .animate-gentle-float {
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-brand-950 text-slate-100 antialiased">
+    <a
+      href="#main"
+      class="fixed left-4 top-4 z-[100] -translate-x-[120vw] rounded-lg bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg focus:translate-x-0 focus:outline-none focus:ring-2 focus:ring-white"
+      >Skip to content</a
+    >
+    <header
+      class="sticky top-0 z-40 border-b border-brand-800/80 bg-brand-950/95 backdrop-blur"
+    >
+      <div
+        class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6"
+      >
+        <a
+          href="/"
+          class="group flex items-center gap-3 rounded-xl py-1 pr-2 transition-transform duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-accent-500"
+        >
+          <img
+            src={publicBrandLogoPath}
+            width="56"
+            height="56"
+            alt=""
+            class="h-12 w-12 shrink-0 rounded-xl object-cover shadow-md shadow-black/20 transition-shadow duration-300 group-hover:shadow-lg group-hover:shadow-accent-500/15 sm:h-14 sm:w-14"
+          />
+          <span class="flex flex-col leading-tight">
+            <span
+              class="text-lg font-bold tracking-tight text-white group-hover:text-brand-100"
+              >{siteMeta.name}</span
+            >
+            <span class="text-xs text-brand-100/80">Bike taxi &amp; local rides</span>
+          </span>
+        </a>
+        <nav aria-label="Main" class="flex items-center gap-1 sm:gap-2">
+          {
+            navLinks.map((link) => (
+              <a
+                href={link.href}
+                class="rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
+              >
+                {link.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="mx-auto max-w-3xl px-4 py-8 pb-24 sm:px-6 sm:py-10 sm:pb-10">
+      <slot />
+    </main>
+    <footer
+      class="border-t border-brand-800/80 bg-brand-950 px-4 py-8 sm:px-6"
+    >
+      <div
+        class="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p class="font-semibold text-white">{siteMeta.name}</p>
+          <p class="mt-1 text-sm text-brand-100/80">{siteMeta.tagline}</p>
+        </div>
+        <div class="flex flex-col gap-2 text-sm">
+          <a
+            href={`tel:${siteMeta.phoneTel}`}
+            class="text-brand-100 hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500 rounded"
+            >{siteMeta.phoneDisplay}</a
+          >
+          <a
+            href={`mailto:${siteMeta.email}`}
+            class="text-brand-100 hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500 rounded break-all"
+            >{siteMeta.email}</a
+          >
+        </div>
+      </div>
+      <p class="mx-auto mt-6 max-w-3xl text-center text-xs text-brand-100/50">
+        © {new Date().getFullYear()} {siteMeta.name}. All rights reserved.
+      </p>
+    </footer>
+
+    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-brand-800/70 bg-brand-950/95 backdrop-blur sm:hidden">
+      <div class="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+        <a
+          href={`tel:${siteMeta.phoneTel}`}
+          class="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-brand-700 bg-brand-900/60 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
+        >
+          Call
+        </a>
+        <a
+          href="/book"
+          class="inline-flex min-h-[48px] flex-[1.25] items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-accent-500/15 focus:outline-none focus:ring-2 focus:ring-accent-400"
+        >
+          Book now
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
