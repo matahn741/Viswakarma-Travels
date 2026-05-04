@@ -434,4 +434,16 @@ export function initBookingFormClient(options: {
     qrImg.addEventListener("error", () => qrImg.classList.add("hidden"));
     if (qrImg.complete && qrImg.naturalHeight > 0) qrImg.classList.remove("hidden");
   }
+
+  const payWithUpiBtn = document.getElementById("pay-with-upi-btn");
+  const qrPanel = document.getElementById("upi-qr-panel");
+  if (payWithUpiBtn instanceof HTMLButtonElement) {
+    payWithUpiBtn.addEventListener("click", () => {
+      if (qrPanel) qrPanel.classList.toggle("hidden");
+      if (upiStatus) upiStatus.textContent = qrPanel?.classList.contains("hidden")
+        ? ""
+        : "Scan the QR or tap “Pay advance in UPI app”.";
+      qrPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 }

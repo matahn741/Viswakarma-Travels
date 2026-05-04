@@ -342,6 +342,14 @@ import {
         <p class="mt-2 select-all break-all text-lg font-mono font-semibold text-accent-400">{upi.id}</p>
         <p class="mt-1 text-sm text-brand-100/80">Payee: {upi.payeeName}</p>
       </div>
+
+      <button
+        type="button"
+        id="pay-with-upi-btn"
+        class="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400 sm:w-auto"
+      >
+        Pay with UPI (show QR)
+      </button>
       <div class="grid gap-3 sm:grid-cols-2">
         <a
           id="upi-pay-link"
@@ -359,7 +367,11 @@ import {
         </button>
       </div>
       <p id="upi-action-status" class="text-xs text-brand-100/70"></p>
-      <div class="flex justify-center">
+      <div id="upi-qr-panel" class="hidden rounded-2xl border border-brand-700 bg-brand-950/60 p-4">
+        <p class="text-center text-xs font-medium uppercase tracking-wide text-brand-100/70">
+          Scan this QR in any UPI app
+        </p>
+        <div class="mt-3 flex justify-center">
         <img
           src={publicUpiQrPath}
           alt="Scan to pay with UPI"
@@ -369,6 +381,7 @@ import {
           id="upi-qr-img"
           loading="lazy"
         />
+        </div>
       </div>
       <p class="text-xs text-brand-100/70">
         After you send the <strong class="text-brand-100">10% advance</strong> from your UPI app, continue to the next
