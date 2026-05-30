@@ -194,20 +194,21 @@ export function initBookingFormClient(options: {
 
   const form = document.getElementById("booking-form");
   if (!(form instanceof HTMLFormElement)) return;
+  const bookingForm = form;
 
-  form.querySelectorAll('input[name="bikeId"]').forEach((radio) => {
+  bookingForm.querySelectorAll('input[name="bikeId"]').forEach((radio) => {
     radio.addEventListener("change", () => {
       invalidateFare();
       const manual = document.getElementById("manualDistanceKm");
       if (manual instanceof HTMLInputElement) manual.value = "";
-      syncVehicleUi(form, bikeTaxiId);
+      syncVehicleUi(bookingForm, bikeTaxiId);
     });
   });
 
   for (const id of ["pickup", "drop"]) {
     const el = document.getElementById(id);
     el?.addEventListener("input", () => {
-      if (isBikeTaxi(form, bikeTaxiId)) invalidateFare();
+      if (isBikeTaxi(bookingForm, bikeTaxiId)) invalidateFare();
     });
   }
 
@@ -220,8 +221,8 @@ export function initBookingFormClient(options: {
   if (calcFareBtn instanceof HTMLButtonElement) {
     calcFareBtn.addEventListener("click", () => {
       clearError();
-      if (!isBikeTaxi(form, bikeTaxiId)) return;
-      if (!validateStepTwo(form)) return;
+      if (!isBikeTaxi(bookingForm, bikeTaxiId)) return;
+      if (!validateStepTwo(bookingForm)) return;
 
       const raw = (document.getElementById("manualDistanceKm") as HTMLInputElement)?.value.trim() ?? "";
       const km = Number(raw);
@@ -279,10 +280,10 @@ export function initBookingFormClient(options: {
           return;
         }
         showStep(2);
-        syncVehicleUi(form, bikeTaxiId);
+        syncVehicleUi(bookingForm, bikeTaxiId);
       } else if (current === 2) {
-        if (!validateStepTwo(form)) return;
-        if (isBikeTaxi(form, bikeTaxiId)) {
+        if (!validateStepTwo(bookingForm)) return;
+        if (isBikeTaxi(bookingForm, bikeTaxiId)) {
           if (!fareReady) {
             stepError('Tap “Calculate fare” after entering trip distance in km.');
             return;
@@ -321,7 +322,7 @@ export function initBookingFormClient(options: {
     if (refEl && typeof data.reference === "string") {
       refEl.textContent = data.reference;
     }
-    form.classList.add("hidden");
+    bookingForm.classList.add("hidden");
     document.getElementById("step-indicator")?.classList.add("hidden");
     successPanel?.classList.remove("hidden");
     if (successPanel instanceof HTMLElement) successPanel.focus();
@@ -330,8 +331,8 @@ export function initBookingFormClient(options: {
   if (enquiryBtn instanceof HTMLButtonElement) {
     enquiryBtn.addEventListener("click", async () => {
       clearError();
-      if (isBikeTaxi(form, bikeTaxiId)) return;
-      if (!validateStepTwo(form)) return;
+      if (isBikeTaxi(bookingForm, bikeTaxiId)) return;
+      if (!validateStepTwo(bookingForm)) return;
 
       enquiryBtn.disabled = true;
       enquiryBtn.textContent = "Sending…";
@@ -365,7 +366,7 @@ export function initBookingFormClient(options: {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearError();
-    if (!isBikeTaxi(form, bikeTaxiId)) {
+    if (!isBikeTaxi(bookingForm, bikeTaxiId)) {
       stepError("For car or auto, use Submit booking request on step 2.");
       return;
     }
@@ -413,7 +414,7 @@ export function initBookingFormClient(options: {
   }
 
   setFareReady(false);
-  syncVehicleUi(form, bikeTaxiId);
+  syncVehicleUi(bookingForm, bikeTaxiId);
 
   const copyUpiBtn = document.getElementById("copy-upi-btn");
   const upiStatus = document.getElementById("upi-action-status");

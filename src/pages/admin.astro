@@ -1,0 +1,347 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { bikes, siteMeta } from "../config/site";
+import { getAdminSession, isAdminConfigured } from "../lib/adminAuth";
+
+export const prerender = false;
+
+const session = await getAdminSession(Astro.cookies);
+const configured = isAdminConfigured();
+---
+
+<Layout title={`Admin - ${siteMeta.name}`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-white sm:text-3xl">Admin</h1>
+    <p class="mt-2 text-sm text-brand-100/80">
+      Manage vehicle availability, weekly off days, date closures, and review recent admin activity.
+    </p>
+  </div>
+
+  {
+    !configured ? (
+      <div class="rounded-xl border border-red-500/40 bg-red-950/50 p-4 text-sm text-red-100">
+        Admin login is not configured. Add ADMIN_USER_ID, ADMIN_PASSWORD, ADMIN_SESSION_SECRET, and MONGODB_URI to your
+        environment.
+      </div>
+    ) : (
+      <>
+        <section
+          id="login-panel"
+          class={`rounded-xl border border-brand-800 bg-brand-900/60 p-5 ${session ? "hidden" : ""}`}
+        >
+          <h2 class="text-lg font-semibold text-white">Secure login</h2>
+          <form id="admin-login-form" class="mt-4 space-y-4">
+            <p
+              id="login-error"
+              class="hidden rounded-lg border border-red-500/40 bg-red-950/50 px-3 py-2 text-sm text-red-100"
+              role="alert"
+            />
+            <div>
+              <label for="admin-user-id" class="block text-sm font-medium text-brand-100">User ID</label>
+              <input
+                id="admin-user-id"
+                name="userId"
+                type="text"
+                autocomplete="username"
+                required
+                class="mt-1 w-full min-h-[48px] rounded-xl border border-brand-700 bg-brand-950 px-3 py-2 text-white focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              />
+            </div>
+            <div>
+              <label for="admin-password" class="block text-sm font-medium text-brand-100">Password</label>
+              <input
+                id="admin-password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                class="mt-1 w-full min-h-[48px] rounded-xl border border-brand-700 bg-brand-950 px-3 py-2 text-white focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              />
+            </div>
+            <button
+              id="login-submit"
+              type="submit"
+              class="min-h-[48px] rounded-xl bg-accent-500 px-5 py-3 font-semibold text-brand-950 transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400"
+            >
+              Login
+            </button>
+          </form>
+        </section>
+
+        <section id="admin-panel" class={`space-y-6 ${session ? "" : "hidden"}`}>
+          <div class="flex flex-col gap-3 rounded-xl border border-brand-800 bg-brand-900/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-brand-100/70">Signed in as</p>
+              <p class="font-semibold text-white">{session?.userId}</p>
+            </div>
+            <button
+              id="logout-btn"
+              type="button"
+              class="min-h-[44px] rounded-xl border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-100 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-accent-500"
+            >
+              Logout
+            </button>
+          </div>
+
+          <form id="settings-form" class="space-y-6 rounded-xl border border-brand-800 bg-brand-900/60 p-5">
+            <div>
+              <h2 class="text-lg font-semibold text-white">Vehicle control</h2>
+              <p class="mt-1 text-sm text-brand-100/75">Blocked vehicle types cannot be booked from the public form.</p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                {
+                  bikes.map((bike) => (
+                    <label class="flex min-h-[92px] cursor-pointer items-start gap-3 rounded-xl border border-brand-700 bg-brand-950/60 p-4">
+                      <input
+                        type="checkbox"
+                        name="blockedVehicleTypes"
+                        value={bike.id}
+                        class="mt-1 h-5 w-5 rounded border-brand-600 text-accent-500 focus:ring-accent-500"
+                      />
+                      <span>
+                        <span class="block font-medium text-white">{bike.name}</span>
+                        <span class="mt-1 block text-xs text-brand-100/70">Block this type</span>
+                      </span>
+                    </label>
+                  ))
+                }
+              </div>
+            </div>
+
+            <div>
+              <h2 class="text-lg font-semibold text-white">Weekly off days</h2>
+              <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {
+                  ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day, index) => (
+                    <label class="flex min-h-[48px] cursor-pointer items-center gap-2 rounded-xl border border-brand-700 bg-brand-950/60 px-3 py-2 text-sm text-brand-100">
+                      <input
+                        type="checkbox"
+                        name="closedWeekdays"
+                        value={index}
+                        class="h-5 w-5 rounded border-brand-600 text-accent-500 focus:ring-accent-500"
+                      />
+                      {day}
+                    </label>
+                  ))
+                }
+              </div>
+            </div>
+
+            <div>
+              <h2 class="text-lg font-semibold text-white">Specific closed dates</h2>
+              <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  id="closed-date-input"
+                  type="date"
+                  class="min-h-[48px] rounded-xl border border-brand-700 bg-brand-950 px-3 py-2 text-white focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                />
+                <button
+                  id="add-closed-date"
+                  type="button"
+                  class="min-h-[48px] rounded-xl border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-100 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-accent-500"
+                >
+                  Add date
+                </button>
+              </div>
+              <div id="closed-date-list" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+
+            <p
+              id="settings-status"
+              class="hidden rounded-lg border border-brand-700 bg-brand-950/60 px-3 py-2 text-sm text-brand-100"
+              role="status"
+            ></p>
+
+            <button
+              id="save-settings"
+              type="submit"
+              class="min-h-[48px] rounded-xl bg-accent-500 px-5 py-3 font-semibold text-brand-950 transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400"
+            >
+              Save controls
+            </button>
+          </form>
+
+          <section class="rounded-xl border border-brand-800 bg-brand-900/60 p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-white">Admin action log</h2>
+                <p class="mt-1 text-sm text-brand-100/75">Recent logins, logouts, and setting changes.</p>
+              </div>
+              <button
+                id="refresh-logs"
+                type="button"
+                class="min-h-[44px] rounded-xl border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-100 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-accent-500"
+              >
+                Refresh
+              </button>
+            </div>
+            <div id="log-list" class="mt-4 space-y-3 text-sm text-brand-100/85"></div>
+          </section>
+        </section>
+      </>
+    )
+  }
+</Layout>
+
+<script>
+  const loginPanel = document.getElementById("login-panel");
+  const adminPanel = document.getElementById("admin-panel");
+  const loginForm = document.getElementById("admin-login-form");
+  const loginError = document.getElementById("login-error");
+  const settingsForm = document.getElementById("settings-form");
+  const settingsStatus = document.getElementById("settings-status");
+  const closedDateInput = document.getElementById("closed-date-input");
+  const closedDateList = document.getElementById("closed-date-list");
+  const logList = document.getElementById("log-list");
+
+  let closedDates = [];
+
+  function showText(el, text, isError = false) {
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove("hidden");
+    el.classList.toggle("border-red-500/40", isError);
+    el.classList.toggle("bg-red-950/50", isError);
+    el.classList.toggle("text-red-100", isError);
+  }
+
+  function collectSettings() {
+    const blockedVehicleTypes = Array.from(
+      document.querySelectorAll('input[name="blockedVehicleTypes"]:checked'),
+    ).map((input) => input.value);
+    const closedWeekdays = Array.from(
+      document.querySelectorAll('input[name="closedWeekdays"]:checked'),
+    ).map((input) => Number(input.value));
+    return { blockedVehicleTypes, closedWeekdays, closedDates };
+  }
+
+  function renderClosedDates() {
+    if (!closedDateList) return;
+    closedDateList.innerHTML = "";
+    if (closedDates.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "text-sm text-brand-100/65";
+      empty.textContent = "No specific closed dates added.";
+      closedDateList.append(empty);
+      return;
+    }
+    closedDates.forEach((date) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className =
+        "rounded-lg border border-brand-600 bg-brand-950 px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800";
+      button.textContent = `${date} x`;
+      button.addEventListener("click", () => {
+        closedDates = closedDates.filter((value) => value !== date);
+        renderClosedDates();
+      });
+      closedDateList.append(button);
+    });
+  }
+
+  function applySettings(settings) {
+    document.querySelectorAll('input[name="blockedVehicleTypes"]').forEach((input) => {
+      input.checked = settings.blockedVehicleTypes?.includes(input.value) ?? false;
+    });
+    document.querySelectorAll('input[name="closedWeekdays"]').forEach((input) => {
+      input.checked = settings.closedWeekdays?.includes(Number(input.value)) ?? false;
+    });
+    closedDates = Array.isArray(settings.closedDates) ? settings.closedDates : [];
+    renderClosedDates();
+  }
+
+  async function fetchJson(url, options = {}) {
+    const res = await fetch(url, options);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Request failed.");
+    return data;
+  }
+
+  async function loadSettings() {
+    const data = await fetchJson("/api/admin/settings");
+    applySettings(data.settings);
+  }
+
+  async function loadLogs() {
+    if (!logList) return;
+    logList.textContent = "Loading...";
+    try {
+      const data = await fetchJson("/api/admin/logs");
+      logList.innerHTML = "";
+      if (!Array.isArray(data.logs) || data.logs.length === 0) {
+        logList.textContent = "No admin actions logged yet.";
+        return;
+      }
+      data.logs.forEach((log) => {
+        const item = document.createElement("div");
+        item.className = "rounded-lg border border-brand-800 bg-brand-950/60 p-3";
+        const time = log.createdAt ? new Date(log.createdAt).toLocaleString() : "Unknown time";
+        item.textContent = `${time} - ${log.userId || "admin"} - ${log.action || "action"}`;
+        logList.append(item);
+      });
+    } catch (error) {
+      logList.textContent = error instanceof Error ? error.message : "Could not load logs.";
+    }
+  }
+
+  async function enterAdmin() {
+    loginPanel?.classList.add("hidden");
+    adminPanel?.classList.remove("hidden");
+    await loadSettings();
+    await loadLogs();
+  }
+
+  loginForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(loginForm instanceof HTMLFormElement)) return;
+    loginError?.classList.add("hidden");
+    const body = Object.fromEntries(new FormData(loginForm));
+    try {
+      await fetchJson("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      await enterAdmin();
+    } catch (error) {
+      showText(loginError, error instanceof Error ? error.message : "Login failed.", true);
+    }
+  });
+
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    window.location.reload();
+  });
+
+  document.getElementById("add-closed-date")?.addEventListener("click", () => {
+    if (!(closedDateInput instanceof HTMLInputElement) || !closedDateInput.value) return;
+    if (!closedDates.includes(closedDateInput.value)) closedDates.push(closedDateInput.value);
+    closedDates.sort();
+    closedDateInput.value = "";
+    renderClosedDates();
+  });
+
+  settingsForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    showText(settingsStatus, "Saving...");
+    try {
+      const data = await fetchJson("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(collectSettings()),
+      });
+      applySettings(data.settings);
+      showText(settingsStatus, "Admin controls saved.");
+      await loadLogs();
+    } catch (error) {
+      showText(settingsStatus, error instanceof Error ? error.message : "Could not save settings.", true);
+    }
+  });
+
+  document.getElementById("refresh-logs")?.addEventListener("click", () => {
+    void loadLogs();
+  });
+
+  if (!adminPanel?.classList.contains("hidden")) {
+    void enterAdmin();
+  }
+</script>

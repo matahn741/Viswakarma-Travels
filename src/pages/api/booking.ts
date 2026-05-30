@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { bikes, bikeTaxiId } from "../../config/site";
+import { dateIsClosed, getBookingAdminSettings } from "../../lib/adminStore";
 import { computeAdvanceInr, computeFareForDistanceKm } from "../../lib/fare";
 
 export const prerender = false;
@@ -92,6 +93,11 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: "Please select a valid vehicle." }, 400);
   }
 
+  const adminSettings = await getBookingAdminSettings();
+  if (adminSettings.blockedVehicleTypes.includes(bikeId)) {
+    return json({ error: `${bike.name} bookings are currently unavailable.` }, 403);
+  }
+
   if (!date || !time || !customerName || !customerPhone || !pickup || !drop) {
     return json(
       { error: "Name, phone, date, time, pickup, and drop are required." },
@@ -109,6 +115,9 @@ export const POST: APIRoute = async ({ request }) => {
   pickDay.setHours(0, 0, 0, 0);
   if (pickDay < today) {
     return json({ error: "Date must be today or in the future." }, 400);
+  }
+  if (dateIsClosed(date, adminSettings)) {
+    return json({ error: "Bookings are closed for the selected date." }, 403);
   }
 
   const isBikeTaxi = bikeId === bikeTaxiId;
