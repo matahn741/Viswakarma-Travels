@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { bikes } from "../config/site";
 
 export type AdminSettings = {
   blockedVehicleTypes: string[];
@@ -12,6 +13,8 @@ const defaultSettings: AdminSettings = {
   closedWeekdays: [],
   closedDates: [],
 };
+
+const vehicleTypeIds = new Set(bikes.map((bike) => bike.id));
 
 let connectPromise: Promise<typeof mongoose> | null = null;
 
@@ -57,7 +60,9 @@ const AdminActionLogModel =
 
 function normalizeSettings(settings: Partial<AdminSettings> | null | undefined): AdminSettings {
   return {
-    blockedVehicleTypes: Array.from(new Set(settings?.blockedVehicleTypes ?? [])).filter(Boolean),
+    blockedVehicleTypes: Array.from(new Set(settings?.blockedVehicleTypes ?? []))
+      .filter((vehicleType) => vehicleTypeIds.has(vehicleType))
+      .sort(),
     closedWeekdays: Array.from(new Set(settings?.closedWeekdays ?? []))
       .map(Number)
       .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)

@@ -31,6 +31,15 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   const userId = String(payload.userId ?? "").trim();
   const password = String(payload.password ?? "");
   if (!credentialsAreValid(userId, password)) {
+    try {
+      await logAdminAction({
+        userId: userId || "unknown",
+        action: "failed_login",
+        ip: clientAddress,
+      });
+    } catch {
+      // Do not reveal audit-log availability to unauthenticated callers.
+    }
     return json({ error: "Invalid user ID or password." }, 401);
   }
 
@@ -38,7 +47,7 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
     await logAdminAction({ userId, action: "login", ip: clientAddress });
   } catch (error) {
     return json(
-      { error: error instanceof Error ? error.message : "Could not write admin audit log." },
+      { error: error instanceof Error ? error.message : String(error), },
       503,
     );
   }

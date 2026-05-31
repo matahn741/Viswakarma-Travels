@@ -9,7 +9,7 @@ type SessionPayload = {
 };
 
 function getSecret() {
-  return import.meta.env.ADMIN_SESSION_SECRET || import.meta.env.ADMIN_PASSWORD || "";
+  return import.meta.env.ADMIN_SESSION_SECRET || "";
 }
 
 function base64UrlEncode(input: string | ArrayBuffer) {
@@ -55,6 +55,11 @@ async function verify(value: string, signature: string) {
   return diff === 0;
 }
 
+console.log("ADMIN_USER_ID =", import.meta.env.ADMIN_USER_ID);
+console.log("ADMIN_PASSWORD =", import.meta.env.ADMIN_PASSWORD);
+console.log("MONGODB_URI =", import.meta.env.MONGODB_URI);
+console.log("ADMIN_SESSION_SECRET =", import.meta.env.ADMIN_SESSION_SECRET)
+
 export function isAdminConfigured() {
   return Boolean(
     import.meta.env.ADMIN_USER_ID &&
@@ -65,7 +70,16 @@ export function isAdminConfigured() {
 }
 
 export function credentialsAreValid(userId: string, password: string) {
-  return userId === import.meta.env.ADMIN_USER_ID && password === import.meta.env.ADMIN_PASSWORD;
+  const expectedUserId = import.meta.env.ADMIN_USER_ID || "";
+  const expectedPassword = import.meta.env.ADMIN_PASSWORD || "";
+  const supplied = `${userId}\u0000${password}`;
+  const expected = `${expectedUserId}\u0000${expectedPassword}`;
+  if (supplied.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i += 1) {
+    diff |= supplied.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 export async function createAdminSessionCookie(userId: string) {

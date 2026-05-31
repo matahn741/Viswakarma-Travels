@@ -13,6 +13,12 @@ function isBikeTaxi(form: HTMLFormElement, bikeTaxiId: string): boolean {
   return getSelectedBikeId(form) === bikeTaxiId;
 }
 
+type AvailabilitySettings = {
+  blockedVehicleTypes: string[];
+  closedWeekdays: number[];
+  closedDates: string[];
+};
+
 function syncVehicleUi(form: HTMLFormElement, bikeTaxiId: string) {
   const bike = isBikeTaxi(form, bikeTaxiId);
   document.querySelectorAll("[data-bike-only]").forEach((el) => {
@@ -51,6 +57,11 @@ export function initBookingFormClient(options: {
 
   let current = 1;
   let fareReady = false;
+  let availability: AvailabilitySettings = {
+    blockedVehicleTypes: [],
+    closedWeekdays: [],
+    closedDates: [],
+  };
 
   function setFareReady(ready: boolean) {
     fareReady = ready;
@@ -77,13 +88,17 @@ export function initBookingFormClient(options: {
     steps.forEach((el) => {
       const s = Number(el.getAttribute("data-step"));
       el.classList.toggle("hidden", s !== n);
+      el.classList.toggle("is-entering", s === n);
+      if (s === n) window.setTimeout(() => el.classList.remove("is-entering"), 460);
     });
     dots.forEach((el) => {
       const s = Number(el.getAttribute("data-step-dot"));
       const on = s === n;
       el.classList.toggle("border-accent-500", on);
-      el.classList.toggle("bg-brand-800", on);
-      el.classList.toggle("text-white", on);
+      el.classList.toggle("bg-accent-500", on);
+      el.classList.toggle("text-brand-950", on);
+      el.classList.toggle("shadow-lg", on);
+      el.classList.toggle("shadow-accent-500/20", on);
       el.classList.toggle("border-brand-700", !on);
       el.classList.toggle("bg-brand-900", !on);
       el.classList.toggle("text-brand-200", !on);
@@ -121,7 +136,77 @@ export function initBookingFormClient(options: {
         return false;
       }
     }
+    const dateInput = formEl.querySelector("#date");
+    if (dateInput instanceof HTMLInputElement && dateIsClosed(dateInput.value)) {
+      dateInput.setCustomValidity("Bookings are closed for the selected date.");
+      dateInput.reportValidity();
+      return false;
+    }
     return true;
+  }
+
+  function dateIsClosed(dateValue: string): boolean {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return false;
+    const parsed = new Date(`${dateValue}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) return false;
+    return (
+      availability.closedDates.includes(dateValue) ||
+      availability.closedWeekdays.includes(parsed.getDay())
+    );
+  }
+
+  function refreshDateAvailability() {
+    const dateInput = document.getElementById("date");
+    if (!(dateInput instanceof HTMLInputElement)) return;
+    dateInput.setCustomValidity(
+      dateIsClosed(dateInput.value) ? "Bookings are closed for the selected date." : "",
+    );
+  }
+
+  function applyAvailabilitySettings(settings: AvailabilitySettings) {
+    availability = {
+      blockedVehicleTypes: Array.isArray(settings.blockedVehicleTypes)
+        ? settings.blockedVehicleTypes
+        : [],
+      closedWeekdays: Array.isArray(settings.closedWeekdays) ? settings.closedWeekdays : [],
+      closedDates: Array.isArray(settings.closedDates) ? settings.closedDates : [],
+    };
+
+    bookingForm.querySelectorAll('input[name="bikeId"]').forEach((radio) => {
+      if (!(radio instanceof HTMLInputElement)) return;
+      const blocked = availability.blockedVehicleTypes.includes(radio.value);
+      radio.disabled = blocked;
+      if (blocked && radio.checked) {
+        radio.checked = false;
+        invalidateFare();
+      }
+
+      const label = radio.closest("label");
+      label?.classList.toggle("cursor-not-allowed", blocked);
+      label?.classList.toggle("opacity-55", blocked);
+      let note = label?.querySelector("[data-availability-note]");
+      if (blocked && !note) {
+        note = document.createElement("span");
+        note.setAttribute("data-availability-note", "");
+        note.className = "mt-2 block text-sm font-semibold text-red-200";
+        note.textContent = "Currently blocked by admin";
+        label?.querySelector("span")?.append(note);
+      }
+      if (!blocked) note?.remove();
+    });
+
+    refreshDateAvailability();
+  }
+
+  async function loadAvailabilitySettings() {
+    try {
+      const res = await fetch("/api/availability", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as AvailabilitySettings;
+      applyAvailabilitySettings(data);
+    } catch {
+      // Booking submission still enforces availability server-side.
+    }
   }
 
   async function refreshPayStepSummary() {
@@ -143,9 +228,9 @@ export function initBookingFormClient(options: {
     const total = Number(totalStr);
     const dist = Number(distStr);
 
-    if (totalEl) totalEl.textContent = Number.isFinite(total) ? formatInr(total) : "—";
-    if (advEl) advEl.textContent = Number.isFinite(advance) ? formatInr(advance) : "—";
-    if (distEl) distEl.textContent = Number.isFinite(dist) ? `${dist} km` : "—";
+    if (totalEl) totalEl.textContent = Number.isFinite(total) ? formatInr(total) : "-";
+    if (advEl) advEl.textContent = Number.isFinite(advance) ? formatInr(advance) : "-";
+    if (distEl) distEl.textContent = Number.isFinite(dist) ? `${dist} km` : "-";
 
     updateMerchantUpiLink(Number.isFinite(advance) && advance > 0 ? advance : null);
   }
@@ -167,7 +252,7 @@ export function initBookingFormClient(options: {
         return;
       }
       btn.disabled = true;
-      if (status) status.textContent = "Fetching location…";
+      if (status) status.textContent = "Fetching location...";
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude.toFixed(6);
@@ -254,7 +339,7 @@ export function initBookingFormClient(options: {
       if (advRead) advRead.textContent = formatInr(advance);
       if (slabsRead) {
         const slabs = Math.max(1, Math.ceil(roundedKm - 1e-9));
-        slabsRead.textContent = `First km Rs 12 + ${Math.max(0, slabs - 1)} × Rs 6`;
+        slabsRead.textContent = `First km Rs 12 + ${Math.max(0, slabs - 1)} x Rs 6`;
       }
 
       fareSummary?.classList.remove("hidden");
@@ -279,18 +364,22 @@ export function initBookingFormClient(options: {
           stepError("Please select a vehicle.");
           return;
         }
+        if (bike instanceof HTMLInputElement && bike.disabled) {
+          stepError("This vehicle type is currently unavailable.");
+          return;
+        }
         showStep(2);
         syncVehicleUi(bookingForm, bikeTaxiId);
       } else if (current === 2) {
         if (!validateStepTwo(bookingForm)) return;
         if (isBikeTaxi(bookingForm, bikeTaxiId)) {
           if (!fareReady) {
-            stepError('Tap “Calculate fare” after entering trip distance in km.');
+            stepError('Tap "Calculate fare" after entering trip distance in km.');
             return;
           }
           showStep(3);
         } else {
-          stepError("Use “Submit booking request” below for car or auto.");
+          stepError('Use "Submit booking request" below for car or auto.');
         }
       } else if (current === 3) {
         showStep(4);
@@ -325,6 +414,7 @@ export function initBookingFormClient(options: {
     bookingForm.classList.add("hidden");
     document.getElementById("step-indicator")?.classList.add("hidden");
     successPanel?.classList.remove("hidden");
+    successPanel?.classList.add("animate-fade-up");
     if (successPanel instanceof HTMLElement) successPanel.focus();
   }
 
@@ -335,7 +425,7 @@ export function initBookingFormClient(options: {
       if (!validateStepTwo(bookingForm)) return;
 
       enquiryBtn.disabled = true;
-      enquiryBtn.textContent = "Sending…";
+      enquiryBtn.textContent = "Sending...";
 
       try {
         const body = new FormData(form);
@@ -379,7 +469,7 @@ export function initBookingFormClient(options: {
     }
     if (submitBtn instanceof HTMLButtonElement) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "Sending…";
+      submitBtn.textContent = "Sending...";
     }
 
     try {
@@ -411,10 +501,15 @@ export function initBookingFormClient(options: {
     const m = String(t.getMonth() + 1).padStart(2, "0");
     const d = String(t.getDate()).padStart(2, "0");
     dateInput.min = `${y}-${m}-${d}`;
+    dateInput.addEventListener("input", () => {
+      refreshDateAvailability();
+      if (isBikeTaxi(bookingForm, bikeTaxiId)) invalidateFare();
+    });
   }
 
   setFareReady(false);
   syncVehicleUi(bookingForm, bikeTaxiId);
+  void loadAvailabilitySettings();
 
   const copyUpiBtn = document.getElementById("copy-upi-btn");
   const upiStatus = document.getElementById("upi-action-status");
@@ -443,7 +538,7 @@ export function initBookingFormClient(options: {
       if (qrPanel) qrPanel.classList.toggle("hidden");
       if (upiStatus) upiStatus.textContent = qrPanel?.classList.contains("hidden")
         ? ""
-        : "Scan the QR or tap “Pay advance in UPI app”.";
+        : 'Scan the QR or tap "Open UPI app".';
       qrPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }

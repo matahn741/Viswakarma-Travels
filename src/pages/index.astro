@@ -4,107 +4,141 @@ import { siteMeta, bikes, serviceCoverage, publicBrandLogoPath } from "../config
 ---
 
 <Layout>
-  <section class="text-center">
-    <div class="animate-gentle-float mx-auto mb-6 flex max-w-[min(100%,20rem)] justify-center">
-      <img
-        src={publicBrandLogoPath}
-        width="320"
-        height="320"
-        alt="Vishwakarma Travels — safe and spiritual journey"
-        class="h-auto w-full rounded-2xl object-cover shadow-lg shadow-black/30 ring-1 ring-brand-700/50"
-      />
+  <section class="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+    <div class="animate-fade-up">
+      <p
+        class="inline-flex rounded-full border border-accent-400/30 bg-accent-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-400"
+      >
+        Madurai rides, made simple
+      </p>
+      <h1
+        class="mt-5 max-w-3xl text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl"
+      >
+        Premium local rides with transparent fares.
+      </h1>
+      <p class="mt-5 max-w-2xl text-base leading-7 text-brand-100/88 sm:text-lg">
+        {siteMeta.description}
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a
+          href="/book"
+          class="btn-premium inline-flex min-h-[52px] items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-base font-bold text-brand-950 shadow-xl shadow-accent-500/20 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-brand-950"
+          >Book a ride</a
+        >
+        <a
+          href={`tel:${siteMeta.phoneTel}`}
+          class="btn-premium inline-flex min-h-[52px] items-center justify-center rounded-xl border border-white/15 bg-white/[0.08] px-6 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >Call {siteMeta.phoneDisplay}</a
+        >
+      </div>
+      <div class="mt-8 grid grid-cols-3 gap-3 text-center sm:max-w-xl">
+        <div class="rounded-2xl border border-white/10 bg-white/[0.08] p-3 backdrop-blur">
+          <p class="text-lg font-black text-white">10%</p>
+          <p class="mt-1 text-xs text-brand-100/70">UPI advance</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.08] p-3 backdrop-blur">
+          <p class="text-lg font-black text-white">Rs 12</p>
+          <p class="mt-1 text-xs text-brand-100/70">first km</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.08] p-3 backdrop-blur">
+          <p class="text-lg font-black text-white">24/7</p>
+          <p class="mt-1 text-xs text-brand-100/70">request flow</p>
+        </div>
+      </div>
     </div>
-    <p
-      class="animate-fade-up inline-flex rounded-full bg-brand-800/80 px-3 py-1 text-xs font-medium text-accent-400"
-    >
-      Book in minutes · Distance-based bike fares · UPI advance
-    </p>
-    <h1
-      class="animate-fade-up mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
-      style="animation-delay: 0.08s"
-    >
-      {siteMeta.tagline}
-    </h1>
-    <p
-      class="animate-fade-up mx-auto mt-4 max-w-xl text-base text-brand-100/90"
-      style="animation-delay: 0.15s"
-    >
-      {siteMeta.description}
-    </p>
-    <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-      <a
-        href="/book"
-        class="inline-flex w-full min-h-[48px] items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-base font-semibold text-brand-950 shadow-lg shadow-accent-500/20 hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-brand-950 sm:w-auto"
-        >Book a ride</a
-      >
-      <a
-        href={`tel:${siteMeta.phoneTel}`}
-        class="inline-flex w-full min-h-[48px] items-center justify-center rounded-xl border border-brand-600 bg-brand-900/50 px-6 py-3 text-base font-semibold text-white hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 sm:w-auto"
-        >Call {siteMeta.phoneDisplay}</a
-      >
+
+    <div class="animate-fade-up lg:justify-self-end" style="animation-delay: 0.12s">
+      <div class="premium-card animate-gentle-float rounded-[1.75rem] p-3">
+        <img
+          src={publicBrandLogoPath}
+          width="520"
+          height="520"
+          alt="Vishwakarma Travels - safe and spiritual journey"
+          class="aspect-square w-full rounded-[1.35rem] object-cover shadow-2xl shadow-black/35"
+        />
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div class="rounded-2xl border border-white/10 bg-brand-950/70 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-brand-100/60">Active in</p>
+            <p class="mt-1 text-sm font-semibold text-white">{serviceCoverage.current}</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-brand-950/70 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-brand-100/60">Expanding to</p>
+            <p class="mt-1 text-sm font-semibold text-white">{serviceCoverage.futureExpansion}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="mt-14" aria-labelledby="how-heading">
-    <h2 id="how-heading" class="text-xl font-bold text-white">How it works</h2>
-    <ol class="mt-6 space-y-4">
-      <li class="flex gap-4 rounded-2xl border border-brand-800 bg-brand-900/40 p-4">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white"
-          >1</span
-        >
-        <div>
-          <p class="font-semibold text-white">Choose bike taxi or other vehicle</p>
-          <p class="mt-1 text-sm text-brand-100/85">
-            For bike taxi, enter pickup and drop, then type the trip distance in km. Fare is Rs 12 for the first km and
-            Rs 6 per additional km.
-          </p>
-        </div>
-      </li>
-      <li class="flex gap-4 rounded-2xl border border-brand-800 bg-brand-900/40 p-4">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white"
-          >2</span
-        >
-        <div>
-          <p class="font-semibold text-white">Pay 10% advance via UPI</p>
-          <p class="mt-1 text-sm text-brand-100/85">
-            Pay the advance to our UPI ID or scan our QR code. Your bank app handles the transfer securely.
-          </p>
-        </div>
-      </li>
-      <li class="flex gap-4 rounded-2xl border border-brand-800 bg-brand-900/40 p-4">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white"
-          >3</span
-        >
-        <div>
-          <p class="font-semibold text-white">Confirm with payment proof</p>
-          <p class="mt-1 text-sm text-brand-100/85">
-            After the advance is paid, upload the screenshot. We verify it and confirm your booking.
-          </p>
-        </div>
-      </li>
+  <section class="reveal mt-16" aria-labelledby="how-heading">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-semibold text-accent-400">Quick booking flow</p>
+        <h2 id="how-heading" class="mt-2 text-2xl font-black text-white">How it works</h2>
+      </div>
+      <p class="max-w-xl text-sm text-brand-100/75">
+        Clear steps, mobile-friendly controls, and payment confirmation built into the booking flow.
+      </p>
+    </div>
+    <ol class="mt-6 grid gap-4 md:grid-cols-3">
+      {
+        [
+          {
+            title: "Choose vehicle",
+            body:
+              "Select bike taxi, car, or auto. Bike taxi fares use the distance you enter.",
+          },
+          {
+            title: "Pay advance",
+            body:
+              "Review the fare and pay the 10% advance with UPI ID, UPI app, or QR.",
+          },
+          {
+            title: "Upload proof",
+            body:
+              "Add the payment screenshot and receive your booking reference instantly.",
+          },
+        ].map((item, index) => (
+          <li
+            class="premium-card reveal rounded-2xl p-5"
+            style={`--reveal-delay: ${index * 90}ms`}
+          >
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-accent-500 text-lg font-black text-brand-950">
+              {index + 1}
+            </span>
+            <h3 class="mt-5 text-lg font-bold text-white">{item.title}</h3>
+            <p class="mt-2 text-sm leading-6 text-brand-100/82">{item.body}</p>
+          </li>
+        ))
+      }
     </ol>
   </section>
 
-  <section class="mt-14" aria-labelledby="fleet-heading">
-    <h2 id="fleet-heading" class="text-xl font-bold text-white">Our vehicle options</h2>
-    <p class="mt-2 text-sm text-brand-100/80">
-      Currently operating in <strong>{serviceCoverage.current}</strong>. Planned expansion:
-      <strong>{serviceCoverage.futureExpansion}</strong>.
-    </p>
-    <p class="mt-2 text-sm text-brand-100/80">
-      Exact fare depends on distance and time-rates below are indicative. Edit service and vehicle list in
-      <code class="rounded bg-brand-800 px-1 text-xs">src/config/site.ts</code>.
-    </p>
-    <ul class="mt-6 grid gap-4 sm:grid-cols-1">
+  <section class="reveal mt-16" aria-labelledby="fleet-heading">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-semibold text-accent-400">Fleet options</p>
+        <h2 id="fleet-heading" class="mt-2 text-2xl font-black text-white">Pick the ride that fits</h2>
+      </div>
+      <p class="max-w-xl text-sm text-brand-100/75">
+        Bike taxi has instant fare calculation. Car and auto bookings are sent as requests for a direct quote.
+      </p>
+    </div>
+    <ul class="mt-6 grid gap-4 md:grid-cols-3">
       {
-        bikes.map((bike) => (
-          <li class="rounded-2xl border border-brand-800 bg-gradient-to-br from-brand-900/60 to-brand-950 p-5 shadow-lg">
-            <h3 class="text-lg font-bold text-white">{bike.name}</h3>
-            <p class="mt-2 text-sm text-brand-100/90">{bike.description}</p>
-            <p class="mt-3 text-sm font-medium text-accent-400">{bike.priceNote}</p>
+        bikes.map((bike, index) => (
+          <li
+            class="premium-card reveal rounded-2xl p-5 transition-transform duration-300 hover:-translate-y-1"
+            style={`--reveal-delay: ${index * 90}ms`}
+          >
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-lg font-bold text-white">{bike.name}</h3>
+              <span class="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-accent-400">
+                Ride
+              </span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-brand-100/84">{bike.description}</p>
+            <p class="mt-4 text-sm font-bold text-accent-400">{bike.priceNote}</p>
           </li>
         ))
       }
@@ -112,8 +146,8 @@ import { siteMeta, bikes, serviceCoverage, publicBrandLogoPath } from "../config
     <div class="mt-8 text-center">
       <a
         href="/book"
-        class="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-accent-500"
-        >Book now</a
+        class="btn-premium inline-flex min-h-[52px] items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-bold text-white shadow-lg shadow-black/20 focus:outline-none focus:ring-2 focus:ring-accent-500"
+        >Start booking</a
       >
     </div>
   </section>

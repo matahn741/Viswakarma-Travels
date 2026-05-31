@@ -22,16 +22,51 @@ const {
     <meta name="theme-color" content="#042f2e" />
     <title>{title}</title>
     <style is:global>
+      :root {
+        color-scheme: dark;
+        --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background:
+          radial-gradient(circle at 12% 10%, rgba(20, 184, 166, 0.2), transparent 34rem),
+          radial-gradient(circle at 88% 4%, rgba(245, 158, 11, 0.14), transparent 28rem),
+          linear-gradient(145deg, #021917 0%, #042f2e 44%, #061d1b 100%);
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: linear-gradient(to bottom, black, transparent 80%);
+        opacity: 0.3;
+      }
+
       @keyframes fade-up {
         from {
           opacity: 0;
-          transform: translateY(10px);
+          transform: translate3d(0, 14px, 0);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
+          transform: translate3d(0, 0, 0);
         }
       }
+
       @keyframes gentle-float {
         0%,
         100% {
@@ -41,31 +76,154 @@ const {
           transform: translateY(-4px);
         }
       }
-      .animate-fade-up {
-        animation: fade-up 0.55s ease-out both;
+
+      @keyframes shimmer {
+        100% {
+          transform: translateX(120%);
+        }
       }
+
+      @keyframes draw-check {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      @keyframes success-pop {
+        0% {
+          opacity: 0;
+          transform: scale(0.88);
+        }
+        65% {
+          opacity: 1;
+          transform: scale(1.04);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .animate-fade-up {
+        animation: fade-up 0.6s var(--ease-premium) both;
+      }
+
       .animate-gentle-float {
         animation: gentle-float 5s ease-in-out infinite;
       }
+
+      .premium-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(204, 251, 241, 0.12);
+        background: linear-gradient(145deg, rgba(17, 94, 89, 0.46), rgba(4, 47, 46, 0.72));
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+      }
+
+      .premium-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.08), transparent 58%);
+        transform: translateX(-120%);
+        transition: transform 0.8s var(--ease-premium);
+      }
+
+      .premium-card:hover::before {
+        transform: translateX(120%);
+      }
+
+      .btn-premium {
+        position: relative;
+        overflow: hidden;
+        transform: translateZ(0);
+        transition:
+          transform 180ms var(--ease-premium),
+          box-shadow 180ms var(--ease-premium),
+          background-color 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .btn-premium:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-premium:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      .btn-premium::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.22), transparent 56%);
+        transform: translateX(-120%);
+      }
+
+      .btn-premium:hover::after {
+        animation: shimmer 0.75s var(--ease-premium);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+        transition:
+          opacity 0.6s var(--ease-premium),
+          transform 0.6s var(--ease-premium);
+        transition-delay: var(--reveal-delay, 0ms);
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .step.is-entering {
+        animation: fade-up 0.42s var(--ease-premium) both;
+      }
+
+      .booking-success-icon {
+        animation: success-pop 0.55s var(--ease-premium) both;
+      }
+
+      .booking-success-icon path {
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: draw-check 0.5s ease-out 0.28s both;
+      }
+
       @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+
         .animate-fade-up,
-        .animate-gentle-float {
+        .animate-gentle-float,
+        .reveal {
           animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
         }
       }
     </style>
   </head>
-  <body class="min-h-screen bg-brand-950 text-slate-100 antialiased">
+  <body class="min-h-screen bg-brand-950 text-slate-100 antialiased selection:bg-accent-500 selection:text-brand-950">
     <a
       href="#main"
       class="fixed left-4 top-4 z-[100] -translate-x-[120vw] rounded-lg bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg focus:translate-x-0 focus:outline-none focus:ring-2 focus:ring-white"
       >Skip to content</a
     >
     <header
-      class="sticky top-0 z-40 border-b border-brand-800/80 bg-brand-950/95 backdrop-blur"
+      class="sticky top-0 z-40 border-b border-white/10 bg-brand-950/80 shadow-lg shadow-black/10 backdrop-blur-xl"
     >
       <div
-        class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6"
+        class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6"
       >
         <a
           href="/"
@@ -76,11 +234,11 @@ const {
             width="56"
             height="56"
             alt=""
-            class="h-12 w-12 shrink-0 rounded-xl object-cover shadow-md shadow-black/20 transition-shadow duration-300 group-hover:shadow-lg group-hover:shadow-accent-500/15 sm:h-14 sm:w-14"
+            class="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-md shadow-black/20 ring-1 ring-white/10 transition-shadow duration-300 group-hover:shadow-lg group-hover:shadow-accent-500/15 sm:h-14 sm:w-14"
           />
           <span class="flex flex-col leading-tight">
             <span
-              class="text-lg font-bold tracking-tight text-white group-hover:text-brand-100"
+              class="text-base font-bold tracking-tight text-white group-hover:text-brand-100 sm:text-lg"
               >{siteMeta.name}</span
             >
             <span class="text-xs text-brand-100/80">Bike taxi &amp; local rides</span>
@@ -91,7 +249,7 @@ const {
             navLinks.map((link) => (
               <a
                 href={link.href}
-                class="rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
+                class="rounded-full px-3 py-2 text-sm font-medium text-brand-100 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
               >
                 {link.label}
               </a>
@@ -100,14 +258,14 @@ const {
         </nav>
       </div>
     </header>
-    <main id="main" class="mx-auto max-w-3xl px-4 py-8 pb-24 sm:px-6 sm:py-10 sm:pb-10">
+    <main id="main" class="mx-auto max-w-5xl px-4 py-8 pb-24 sm:px-6 sm:py-10 sm:pb-10">
       <slot />
     </main>
     <footer
-      class="border-t border-brand-800/80 bg-brand-950 px-4 py-8 sm:px-6"
+      class="border-t border-white/10 bg-brand-950/70 px-4 py-8 backdrop-blur sm:px-6"
     >
       <div
-        class="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        class="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
           <p class="font-semibold text-white">{siteMeta.name}</p>
@@ -116,36 +274,59 @@ const {
         <div class="flex flex-col gap-2 text-sm">
           <a
             href={`tel:${siteMeta.phoneTel}`}
-            class="text-brand-100 hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500 rounded"
+            class="rounded text-brand-100 transition-colors hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
             >{siteMeta.phoneDisplay}</a
           >
           <a
             href={`mailto:${siteMeta.email}`}
-            class="text-brand-100 hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500 rounded break-all"
+            class="break-all rounded text-brand-100 transition-colors hover:text-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
             >{siteMeta.email}</a
           >
         </div>
       </div>
-      <p class="mx-auto mt-6 max-w-3xl text-center text-xs text-brand-100/50">
+      <p class="mx-auto mt-6 max-w-5xl text-center text-xs text-brand-100/50">
         © {new Date().getFullYear()} {siteMeta.name}. All rights reserved.
       </p>
     </footer>
 
-    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-brand-800/70 bg-brand-950/95 backdrop-blur sm:hidden">
-      <div class="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-brand-950/90 backdrop-blur-xl sm:hidden">
+      <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
         <a
           href={`tel:${siteMeta.phoneTel}`}
-          class="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-brand-700 bg-brand-900/60 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
+          class="btn-premium inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-white/15 bg-brand-900/70 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
         >
           Call
         </a>
         <a
           href="/book"
-          class="inline-flex min-h-[48px] flex-[1.25] items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-accent-500/15 focus:outline-none focus:ring-2 focus:ring-accent-400"
+          class="btn-premium inline-flex min-h-[48px] flex-[1.25] items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-accent-500/15 focus:outline-none focus:ring-2 focus:ring-accent-400"
         >
           Book now
         </a>
       </div>
     </div>
+
+    <script is:inline>
+      (() => {
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.documentElement.classList.add("is-ready");
+        if (reduceMotion || !("IntersectionObserver" in window)) {
+          document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.16, rootMargin: "0px 0px -40px 0px" },
+        );
+        document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+      })();
+    </script>
   </body>
 </html>
