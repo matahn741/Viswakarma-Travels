@@ -63,8 +63,8 @@ export const GET: APIRoute = () =>
   });
 
 export const POST: APIRoute = async ({ request }) => {
-  const token = envValue("TELEGRAM_BOT_TOKEN");
-  const chatId = envValue("TELEGRAM_CHAT_ID");
+  const token = envValue("Token existe:", !!token);
+  const chatId = envValue("Chat ID exists:", !!chatId);
 
   if (!token || !chatId) {
     return json(
