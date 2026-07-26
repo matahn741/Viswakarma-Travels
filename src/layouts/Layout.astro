@@ -4,13 +4,11 @@ import { siteMeta, navLinks, publicBrandLogoPath } from "../config/site";
 interface Props {
   title?: string;
   description?: string;
-  hideMobileCta?: boolean;
 }
 
 const {
   title = siteMeta.name,
   description = siteMeta.description,
-  hideMobileCta = false,
 } = Astro.props;
 ---
 
@@ -21,10 +19,6 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href={publicBrandLogoPath} />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content={siteMeta.name} />
     <meta name="theme-color" content="#042f2e" />
     <title>{title}</title>
     <style is:global>
@@ -295,26 +289,22 @@ const {
       </p>
     </footer>
 
-    {
-      !hideMobileCta && (
-        <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-brand-950/90 backdrop-blur-xl sm:hidden">
-          <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-            <a
-              href={`tel:${siteMeta.phoneTel}`}
-              class="btn-premium inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-white/15 bg-brand-900/70 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
-            >
-              Call
-            </a>
-            <a
-              href="/book"
-              class="btn-premium inline-flex min-h-[48px] flex-[1.25] items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-accent-500/15 focus:outline-none focus:ring-2 focus:ring-accent-400"
-            >
-              Book now
-            </a>
-          </div>
-        </div>
-      )
-    }
+    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-brand-950/90 backdrop-blur-xl sm:hidden">
+      <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+        <a
+          href={`tel:${siteMeta.phoneTel}`}
+          class="btn-premium inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-white/15 bg-brand-900/70 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent-500"
+        >
+          Call
+        </a>
+        <a
+          href="/book"
+          class="btn-premium inline-flex min-h-[48px] flex-[1.25] items-center justify-center rounded-xl bg-accent-500 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-accent-500/15 focus:outline-none focus:ring-2 focus:ring-accent-400"
+        >
+          Book now
+        </a>
+      </div>
+    </div>
 
     <script is:inline>
       (() => {
