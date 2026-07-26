@@ -15,6 +15,10 @@ function json(data: unknown, status: number) {
   });
 }
 
+function envValue(name: "TELEGRAM_BOT_TOKEN" | "TELEGRAM_CHAT_ID") {
+  return String(import.meta.env[name] ?? "").trim();
+}
+
 type TelegramApiResponse = {
   ok?: boolean;
   description?: string;
@@ -35,7 +39,8 @@ async function sendTelegramDocument(
   let docRes: Response;
   try {
     docRes = await fetch(sendDocUrl, { method: "POST", body: docBody });
-  } catch {
+  } catch (error) {
+    console.error("Telegram document request failed:", error);
     return { ok: false, description: "Network error sending document." };
   }
   let docPayload: TelegramApiResponse | null = null;
@@ -45,6 +50,7 @@ async function sendTelegramDocument(
     docPayload = null;
   }
   if (!docRes.ok || docPayload?.ok === false) {
+    console.error("Telegram document rejected:", docPayload?.description ?? docRes.statusText);
     return { ok: false, description: docPayload?.description };
   }
   return { ok: true };
@@ -57,8 +63,8 @@ export const GET: APIRoute = () =>
   });
 
 export const POST: APIRoute = async ({ request }) => {
-  const token = import.meta.env.TELEGRAM_BOT_TOKEN;
-  const chatId = import.meta.env.TELEGRAM_CHAT_ID;
+  const token = envValue("TELEGRAM_BOT_TOKEN");
+  const chatId = envValue("TELEGRAM_CHAT_ID");
 
   if (!token || !chatId) {
     return json(
@@ -167,7 +173,7 @@ export const POST: APIRoute = async ({ request }) => {
   const reference = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
   const textLines = [
-    isBikeTaxi ? "New bike taxi booking — Vishwakarma Travels" : "New ride enquiry — Vishwakarma Travels",
+    isBikeTaxi ? "New bike taxi booking - Vishwakarma Travels" : "New ride enquiry - Vishwakarma Travels",
     `Reference: ${reference}`,
     "",
     `Name: ${customerName}`,
@@ -202,7 +208,8 @@ export const POST: APIRoute = async ({ request }) => {
         text,
       }),
     });
-  } catch {
+  } catch (error) {
+    console.error("Telegram message request failed:", error);
     return json({ error: "Could not reach Telegram. Please try again." }, 502);
   }
   let messagePayload: TelegramApiResponse | null = null;
@@ -212,6 +219,7 @@ export const POST: APIRoute = async ({ request }) => {
     messagePayload = null;
   }
   if (!messageRes.ok || messagePayload?.ok === false) {
+    console.error("Telegram message rejected:", messagePayload?.description ?? messageRes.statusText);
     return json(
       {
         error:
@@ -231,7 +239,7 @@ export const POST: APIRoute = async ({ request }) => {
       chatId,
       fileBlob,
       filename,
-      `UPI advance payment proof · ${reference}`,
+      `UPI advance payment proof - ${reference}`,
     );
     if (!docSend.ok) {
       return json(

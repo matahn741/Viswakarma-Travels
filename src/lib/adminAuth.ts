@@ -55,11 +55,6 @@ async function verify(value: string, signature: string) {
   return diff === 0;
 }
 
-console.log("ADMIN_USER_ID =", import.meta.env.ADMIN_USER_ID);
-console.log("ADMIN_PASSWORD =", import.meta.env.ADMIN_PASSWORD);
-console.log("MONGODB_URI =", import.meta.env.MONGODB_URI);
-console.log("ADMIN_SESSION_SECRET =", import.meta.env.ADMIN_SESSION_SECRET)
-
 export function isAdminConfigured() {
   return Boolean(
     import.meta.env.ADMIN_USER_ID &&
